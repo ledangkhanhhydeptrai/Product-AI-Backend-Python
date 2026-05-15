@@ -15,19 +15,9 @@
 #
 # # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 
-import ollama
+from fastapi import FastAPI
+from app.api.chat import router as chat_router
 
-while True:
-    user_input = input("You: ")
+app = FastAPI(title="AI Ecommerce Backend")
 
-    if user_input.lower() in ["exit", "quit"]:
-        break
-
-    response = ollama.chat(
-        model='llama3',
-        messages=[
-            {"role": "user", "content": user_input}
-        ]
-    )
-
-    print("AI:", response['message']['content'])
+app.include_router(chat_router, prefix="/api")
