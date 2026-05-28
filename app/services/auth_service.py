@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from sqlalchemy import null
 
 from sqlalchemy.orm import Session
 
