@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 from app.api.chat import router as chat_router
 from app.core.database import engine, Base
-
+from app.api.auth import router as auth_router
 from app.models.user import User
 from app.models.category import Category
 from app.models.product import Product
@@ -21,7 +21,7 @@ app = FastAPI(
     docs_url="/",
     redoc_url="/redoc",
 )
-
+app.include_router(auth_router)
 app.include_router(chat_router, prefix="/api")
 
 Base.metadata.create_all(bind=engine)

@@ -15,7 +15,7 @@ class User(Base):
         default=uuid.uuid4
     )
     full_name = Column(String, nullable=False)
-    emails = Column(String, nullable=False, unique=True)
+    email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     phone = Column(String)
     avatar = Column(String)
