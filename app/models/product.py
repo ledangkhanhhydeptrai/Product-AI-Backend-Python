@@ -33,7 +33,14 @@ class Product(Base):
         "Category",
         back_populates="products"
     )
-
+    brand_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("brands.id")
+    )
+    brand = relationship(
+        "Brand",
+        back_populates="products"
+    )
     cart_items = relationship(
         "CartItem",
         back_populates="product"

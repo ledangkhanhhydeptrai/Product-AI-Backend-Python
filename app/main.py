@@ -6,10 +6,16 @@ from fastapi.security import OAuth2PasswordBearer
 from app.api.chat import router as chat_router
 from app.api.auth import router as auth_router
 from app.api.product import router as product_router
-from app.core.database import engine, Base
+from app.api.brand import router as brand_router
+
+from app.core import cloudinary_config
+
 from app.exception.GlobalExceptionHandler import (
     custom_http_exception_handler
 )
+
+from app.core.database import Base, engine
+
 
 app = FastAPI(
     title="AI Ecommerce Backend",
@@ -33,7 +39,11 @@ app.include_router(
     prefix="/api",
     dependencies=[Depends(oauth2_scheme)]
 )
+
 app.include_router(product_router)
+
+app.include_router(brand_router)
+
 Base.metadata.create_all(bind=engine)
 
 if __name__ == '__main__':

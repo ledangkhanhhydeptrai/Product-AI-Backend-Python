@@ -20,3 +20,15 @@ class ProductResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ProductCreateRequest(BaseModel):
+    name: str
+    slug: str
+    description: str
+    price: float
+    stock: int
+    thumbnail: str
+    category_id: str
+    brand_id: str
+    is_active: bool = True

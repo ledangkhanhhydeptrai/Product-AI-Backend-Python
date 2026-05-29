@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.database import SessionLocal
 from app.getDatabase.getAllDatabase import get_db
 from app.schemas.auth_schema import RegisterRequest, LoginRequest
 from app.services.auth_service import AuthService
