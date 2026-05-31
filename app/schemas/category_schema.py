@@ -19,4 +19,3 @@ class CategoryCreateRequest(BaseModel):
     name: str
     slug: str
     description: str
-

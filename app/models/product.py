@@ -4,6 +4,12 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 import uuid
 
+from app.models.brand import Brand
+from app.models.category import Category
+from app.models.cart_item import CartItem
+from app.models.order_item import OrderItem
+from app.models.review import Review
+
 
 class Product(Base):
     __tablename__ = "products"

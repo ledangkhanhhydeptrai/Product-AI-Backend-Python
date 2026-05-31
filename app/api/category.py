@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -32,4 +34,34 @@ def create_category(request: CategoryCreateRequest, db: Session = Depends(get_db
             db,
             request
         )
+    }
+
+
+@router.get("/category/{id}", response_model=ApiResponse[CategoryResponse])
+def get_category(id: UUID, db: Session = Depends(get_db)):
+    category = CategoryService.get_category_by_id(db, id)
+    return {
+        "status": 200,
+        "message": "Get Category Successfully",
+        "data": category
+    }
+
+
+@router.put("/category/{id}", response_model=ApiResponse[CategoryResponse])
+def update_category(id: UUID, request: CategoryCreateRequest, db: Session = Depends(get_db)):
+    category = CategoryService.update_category_by_id(db, id, request)
+    return {
+        "status": 200,
+        "message": "Update Category Successfully",
+        "data": category
+    }
+
+
+@router.delete("/category/{id}")
+def delete_category(id: UUID, db: Session = Depends(get_db)):
+    CategoryService.delete_category_by_id(db, id)
+    return {
+        "status": 200,
+        "message": "Delete Category Successfully",
+        "data": None
     }
