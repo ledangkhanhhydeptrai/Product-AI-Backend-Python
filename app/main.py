@@ -1,12 +1,14 @@
 import uvicorn
 
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import OAuth2PasswordBearer
 
 from app.api.chat import router as chat_router
 from app.api.auth import router as auth_router
 from app.api.product import router as product_router
 from app.api.brand import router as brand_router
+from app.api.category import router as category_router
 
 from app.core import cloudinary_config
 
@@ -16,12 +18,25 @@ from app.exception.GlobalExceptionHandler import (
 
 from app.core.database import Base, engine
 
-
 app = FastAPI(
-    title="AI Ecommerce Backend",
-    docs_url="/",
-    redoc_url="/redoc",
+    title="Product AI API",
+    description="Backend API for Product AI",
+    version="1.0.0",
+    docs_url=None,
+    redoc_url=None
 )
+
+
+@app.get("/", include_in_schema=False)
+async def custom_swagger():
+    if app.openapi_url is None:
+        raise RuntimeError("OpenAPI URL is not configured")
+
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title="Product AI Docs"
+    )
+
 
 app.add_exception_handler(
     HTTPException,
@@ -33,6 +48,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 app.include_router(auth_router)
+app.include_router(category_router)
 
 app.include_router(
     chat_router,

@@ -18,7 +18,7 @@ class AuthService:
                                 detail="Email already registered")
         hashed_password = hash_password(request.password)
         user = User(
-            full_name=request.full_name,
+            full_name=request.fullName,
             email=request.email,
             password=hashed_password
         )

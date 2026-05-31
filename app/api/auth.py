@@ -7,15 +7,16 @@ from app.services.auth_service import AuthService
 
 router = APIRouter(
     prefix="/auth",
-    tags=["auth"]
+    tags=["Authentication"],
+    responses={404: {"description": "Not found"}},
 )
 
 
-@router.post("/register")
+@router.post("/register", summary="")
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     return AuthService.register(db, request)
 
 
-@router.post("/login")
+@router.post("/login", summary="")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     return AuthService.login(db, request)
