@@ -13,3 +13,10 @@ class CategoryResponse(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+
+class CategoryCreateRequest(BaseModel):
+    name: str
+    slug: str
+    description: str
+

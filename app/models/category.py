@@ -1,4 +1,6 @@
-from sqlalchemy import Column, String
+from datetime import datetime
+
+from sqlalchemy import Column, String, DateTime, func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 import uuid
@@ -19,7 +21,13 @@ class Category(Base):
 
     description = Column(String)
 
+    slug = Column(String)
     products = relationship(
         "Product",
         back_populates="category"
+    )
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
     )
