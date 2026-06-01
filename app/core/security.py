@@ -3,8 +3,8 @@
 from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import HTTPException, status
+from fastapi.security import HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -18,10 +18,7 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login"
-)
-
+security = HTTPBearer()
 
 # hash password
 def hash_password(password: str):

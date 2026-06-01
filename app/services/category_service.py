@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -16,11 +16,14 @@ class CategoryService:
 
     @staticmethod
     def create_category(db: Session, new_category: CategoryCreateRequest):
+        existing_category = db.query(Category).filter(Category.name == new_category.name).first()
+        if existing_category:
+            raise HTTPException(status_code=400, detail="Category Already Exists")
         new_category = Category(
             name=new_category.name,
             description=new_category.description,
             slug=new_category.slug,
-            created_at=datetime.datetime.utcnow(),
+            created_at=datetime.now(),
         )
         db.add(new_category)
         db.commit()

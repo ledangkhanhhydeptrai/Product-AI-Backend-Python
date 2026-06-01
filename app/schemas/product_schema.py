@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -29,6 +30,13 @@ class ProductCreateRequest(BaseModel):
     price: float
     stock: int
     thumbnail: str
-    category_id: str
-    brand_id: str
+    category_id: UUID
+    brand_id: UUID
     is_active: bool = True
+
+
+class ProductListResponse(BaseModel):
+    id: UUID
+    name: str
+    price: float
+    thumbnail: str

@@ -7,6 +7,7 @@ from app.services.category_service import CategoryService
 from app.getDatabase.getAllDatabase import get_db
 from app.response.ApiResponse import ApiResponse
 from app.schemas.category_schema import CategoryResponse, CategoryCreateRequest
+from app.core.permissions import require_admin
 
 router = APIRouter(
     prefix="/api",
@@ -15,7 +16,9 @@ router = APIRouter(
 )
 
 
-@router.get("/category", response_model=ApiResponse[list[CategoryResponse]])
+@router.get("/category",
+            response_model=ApiResponse[list[CategoryResponse]],
+            dependencies=[Depends(require_admin)])
 def get_all_category(db: Session = Depends(get_db)):
     category = CategoryService.get_all_category(db)
     return {
@@ -25,7 +28,9 @@ def get_all_category(db: Session = Depends(get_db)):
     }
 
 
-@router.post("/category")
+@router.post("/category",
+             response_model=ApiResponse[CategoryResponse],
+             dependencies=[Depends(require_admin)])
 def create_category(request: CategoryCreateRequest, db: Session = Depends(get_db)):
     return {
         "status": 200,
@@ -37,7 +42,9 @@ def create_category(request: CategoryCreateRequest, db: Session = Depends(get_db
     }
 
 
-@router.get("/category/{id}", response_model=ApiResponse[CategoryResponse])
+@router.get("/category/{id}",
+            response_model=ApiResponse[CategoryResponse],
+            dependencies=[Depends(require_admin)])
 def get_category(id: UUID, db: Session = Depends(get_db)):
     category = CategoryService.get_category_by_id(db, id)
     return {
@@ -47,7 +54,9 @@ def get_category(id: UUID, db: Session = Depends(get_db)):
     }
 
 
-@router.put("/category/{id}", response_model=ApiResponse[CategoryResponse])
+@router.put("/category/{id}",
+            response_model=ApiResponse[CategoryResponse],
+            dependencies=[Depends(require_admin)])
 def update_category(id: UUID, request: CategoryCreateRequest, db: Session = Depends(get_db)):
     category = CategoryService.update_category_by_id(db, id, request)
     return {
@@ -57,7 +66,8 @@ def update_category(id: UUID, request: CategoryCreateRequest, db: Session = Depe
     }
 
 
-@router.delete("/category/{id}")
+@router.delete("/category/{id}",
+               dependencies=[Depends(require_admin)])
 def delete_category(id: UUID, db: Session = Depends(get_db)):
     CategoryService.delete_category_by_id(db, id)
     return {

@@ -2,7 +2,6 @@ import uvicorn
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.security import OAuth2PasswordBearer
 
 from app.api.chat import router as chat_router
 from app.api.auth import router as auth_router
@@ -17,6 +16,7 @@ from app.exception.GlobalExceptionHandler import (
 )
 
 from app.core.database import Base, engine
+from app.core.security import security
 
 app = FastAPI(
     title="Product AI API",
@@ -34,7 +34,7 @@ async def custom_swagger():
 
     return get_swagger_ui_html(
         openapi_url=app.openapi_url,
-        title="Product AI Docs"
+        title="Product AI"
     )
 
 
@@ -43,17 +43,13 @@ app.add_exception_handler(
     custom_http_exception_handler
 )
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="token"
-)
-
 app.include_router(auth_router)
 app.include_router(category_router)
 
 app.include_router(
     chat_router,
     prefix="/api",
-    dependencies=[Depends(oauth2_scheme)]
+    dependencies=[Depends(security)]
 )
 
 app.include_router(product_router)

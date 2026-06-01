@@ -43,12 +43,12 @@ class AuthService:
         if not valid_password:
             raise HTTPException(status_code=400,
                                 detail="Invalid credentials")
-        token = create_access_token({"sub": str(user.id), "role": user.role})
+        token = create_access_token({"sub": str(user.id), "role": user.role.lower()})
         return ApiResponse(
             status=200,
             message="User login successfully",
             data={
                 "token": token,
-                "role": user.role
+                "role": user.role.lower()
             }
         )

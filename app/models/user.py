@@ -19,7 +19,7 @@ class User(Base):
     password = Column(String, nullable=False)
     phone = Column(String)
     avatar = Column(String)
-    role = Column(String, default="USER")
+    role = Column(String, default="user")
     is_active = Column(Boolean, default=True)
     orders = relationship("Order",
                           back_populates="user",

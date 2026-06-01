@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, Integer, ForeignKey
+from sqlalchemy import Column, String, Float, Integer, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -29,6 +29,12 @@ class Product(Base):
     stock = Column(Integer, default=0)
 
     image_url = Column(String)
+
+    slug = Column(String)
+
+    thumbnail = Column(String)
+
+    is_active = Column(Boolean, default=True)
 
     category_id = Column(
         UUID(as_uuid=True),

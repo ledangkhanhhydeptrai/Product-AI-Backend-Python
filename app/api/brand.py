@@ -8,6 +8,7 @@ from app.services.brand_service import BrandService
 from app.schemas.brand_schema import CreateBrandRequest, UpdateBrandRequest
 from app.schemas.brand_schema import BrandResponse
 from app.response.ApiResponse import ApiResponse
+from app.core.permissions import require_admin
 
 router = APIRouter(
     prefix="/api",
@@ -25,11 +26,13 @@ def get_brand(db: Session = Depends(get_db)):
     }
 
 
-@router.post("/create-brands")
+@router.post("/create-brands",
+             response_model=ApiResponse[BrandResponse], dependencies=[Depends(require_admin)])
 def create_brand(name: str = Form(...),
                  description: str = Form(...),
                  file: UploadFile = File(...),
-                 db: Session = Depends(get_db)):
+                 db: Session = Depends(get_db),
+                 ):
     brand = CreateBrandRequest(
         name=name,
         description=description,
@@ -56,7 +59,7 @@ def get_brand(db: Session = Depends(get_db), id: UUID = Path(...)):
     }
 
 
-@router.put("/brands/{id}")
+@router.put("/brands/{id}", dependencies=[Depends(require_admin)], response_model=ApiResponse[BrandResponse])
 def update_brand(id: UUID = Path(...),
                  name: str = Form(...),
                  description: str = Form(...),
@@ -74,7 +77,7 @@ def update_brand(id: UUID = Path(...),
     }
 
 
-@router.delete("/brands/{id}")
+@router.delete("/brands/{id}", dependencies=[Depends(require_admin)])
 def delete_brand(db: Session = Depends(get_db), id: UUID = Path(...)):
     BrandService.delete_brand_by_id(db, id)
     return {
