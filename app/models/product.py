@@ -1,4 +1,6 @@
-from sqlalchemy import Column, String, Float, Integer, ForeignKey, Boolean
+from datetime import datetime
+
+from sqlalchemy import Column, String, Float, Integer, ForeignKey, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -40,7 +42,18 @@ class Product(Base):
         UUID(as_uuid=True),
         ForeignKey("categories.id")
     )
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
 
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
     category = relationship(
         "Category",
         back_populates="products"

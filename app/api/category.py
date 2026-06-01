@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("/category",
+@router.get("/public/category",
             response_model=ApiResponse[list[CategoryResponse]],
             dependencies=[Depends(require_admin)])
 def get_all_category(db: Session = Depends(get_db)):
@@ -42,7 +42,7 @@ def create_category(request: CategoryCreateRequest, db: Session = Depends(get_db
     }
 
 
-@router.get("/category/{id}",
+@router.get("/public/category/{id}",
             response_model=ApiResponse[CategoryResponse],
             dependencies=[Depends(require_admin)])
 def get_category(id: UUID, db: Session = Depends(get_db)):

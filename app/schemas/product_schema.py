@@ -5,16 +5,15 @@ from pydantic import BaseModel
 
 
 class ProductResponse(BaseModel):
-    id: str
+    id: UUID
     name: str
     slug: str
     description: str
     price: float
     stock: int
     thumbnail: str
-    category_id: str
-    brand_id: str
-    rating_average: float
+    category_id: UUID
+    brand_id: UUID
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -39,4 +38,13 @@ class ProductListResponse(BaseModel):
     id: UUID
     name: str
     price: float
+    thumbnail: str
+
+
+class ProductUpdateRequest(BaseModel):
+    name: str
+    slug: str
+    description: str
+    price: float
+    stock: int
     thumbnail: str

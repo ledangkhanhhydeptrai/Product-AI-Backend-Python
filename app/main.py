@@ -16,7 +16,6 @@ from app.exception.GlobalExceptionHandler import (
 )
 
 from app.core.database import Base, engine
-from app.core.security import security
 
 app = FastAPI(
     title="Product AI API",
@@ -49,7 +48,6 @@ app.include_router(category_router)
 app.include_router(
     chat_router,
     prefix="/api",
-    dependencies=[Depends(security)]
 )
 
 app.include_router(product_router)
