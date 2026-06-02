@@ -3,7 +3,6 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.models.cart_item import CartItem
 
 class CartItemResponse(BaseModel):
     id: UUID
@@ -13,6 +12,8 @@ class CartItemResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
 class CartResponse(BaseModel):
     id: UUID
     user_id: UUID

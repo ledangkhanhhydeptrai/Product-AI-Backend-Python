@@ -1,8 +1,10 @@
-from sqlalchemy import Column, ForeignKey, Float, String
+from sqlalchemy import Column, ForeignKey, Float, String, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 import uuid
+
+from app.enum.order_status import OrderStatus
 
 
 class Order(Base):
@@ -21,8 +23,13 @@ class Order(Base):
 
     total_price = Column(Float, nullable=False)
 
-    status = Column(String, default="PENDING")
-
+    status = Column(
+        Enum(OrderStatus),
+        default=OrderStatus.PENDING,
+        nullable=False
+    )
+    shipping_address = Column(String, nullable=False)
+    payment_method = Column(String, nullable=False)
     user = relationship(
         "User",
         back_populates="orders"
