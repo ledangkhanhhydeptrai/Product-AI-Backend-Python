@@ -1,9 +1,17 @@
+from uuid import UUID
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
 
 from app.core.security import verify_access_token
 
 security = HTTPBearer()
+
+
+class CurrentUser(BaseModel):
+    id: UUID
+    role: str
 
 
 def get_current_user(
@@ -22,7 +30,7 @@ def get_current_user(
             detail="Invalid token"
         )
 
-    return {
-        "id": user_id,
-        "role": role
-    }
+    return CurrentUser(
+        id=user_id,
+        role=role
+    )

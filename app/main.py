@@ -1,6 +1,6 @@
 import uvicorn
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
 
 from app.api.chat import router as chat_router
@@ -8,6 +8,7 @@ from app.api.auth import router as auth_router
 from app.api.product import router as product_router
 from app.api.brand import router as brand_router
 from app.api.category import router as category_router
+from app.api.cart import router as cart_router
 
 from app.core import cloudinary_config
 
@@ -53,7 +54,7 @@ app.include_router(
 app.include_router(product_router)
 
 app.include_router(brand_router)
-
+app.include_router(cart_router)
 Base.metadata.create_all(bind=engine)
 
 if __name__ == '__main__':

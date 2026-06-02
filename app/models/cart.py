@@ -1,4 +1,6 @@
-from sqlalchemy import Column, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import Column, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -13,7 +15,7 @@ class Cart(Base):
         primary_key=True,
         default=uuid.uuid4
     )
-
+    created_at = Column(DateTime, server_default=func.now())
     user_id = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id")
