@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -13,7 +13,7 @@ class CartItem(Base):
         primary_key=True,
         default=uuid.uuid4
     )
-
+    price = Column(Float)
     cart_id = Column(
         UUID(as_uuid=True),
         ForeignKey("carts.id")
