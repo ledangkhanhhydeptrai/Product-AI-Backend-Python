@@ -49,11 +49,54 @@ class CartService:
         return cart
 
     @staticmethod
-    def remove_from_cart(db: Session, user_id: UUID, product_id: UUID):
+    def update_quantity(db: Session, user_id: UUID, product_id: UUID, quantity: int):
+
+        # 1. Get cart (NOT CartItem)
         cart = db.query(Cart).filter(Cart.user_id == user_id).first()
-        (db.query(CartItem)
-         .filter(CartItem.cart_id == cart.id, CartItem.product_id == product_id)
-         .delete()
-         )
+
+        # 2. Auto create cart if not exists
+        if not cart:
+            cart = Cart(user_id=user_id)
+            db.add(cart)
+            db.commit()
+            db.refresh(cart)
+
+        # 3. Find cart item
+        item = db.query(CartItem).filter(
+            CartItem.cart_id == cart.id,
+            CartItem.product_id == product_id
+        ).first()
+
+        # 4. Update or create
+        if item:
+            item.quantity += quantity
+        else:
+            product = db.query(Product).filter(Product.id == product_id).first()
+
+            item = CartItem(
+                cart_id=cart.id,
+                product_id=product_id,
+                quantity=quantity,
+                price=product.price
+            )
+            db.add(item)
+
         db.commit()
-        return null()
+        db.refresh(cart)
+
+        return cart
+
+    @staticmethod
+    def remove_item(db: Session, user_id: UUID, product_id: UUID):
+
+        cart = db.query(Cart).filter(Cart.user_id == user_id).first()
+        if not cart:
+            return {"success": True}
+
+        db.query(CartItem).filter(
+            CartItem.cart_id == cart.id,
+            CartItem.product_id == product_id
+        ).delete()
+
+        db.commit()
+        return {"success": True}
