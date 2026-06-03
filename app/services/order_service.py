@@ -1,0 +1,111 @@
+import time
+import random
+from uuid import UUID
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session, joinedload
+
+from app.models.order import Order
+from app.models.order_item import OrderItem
+from app.models.product import Product
+from app.models.cart import Cart
+from app.enum.order_status import OrderStatus
+from app.enum.payment_status import PaymentStatus
+from app.schemas.order_schema import BuyNowRequest, CreateOrderFromCartRequest
+
+
+def generate_order_code():
+    return int(time.time() * 1000) + random.randint(100, 999)
+
+
+class OrderService:
+
+    @staticmethod
+    def get_all_order(db: Session, user_id: UUID):
+        return (
+            db.query(Order)
+            .options(
+                joinedload(Order.order_items),
+                joinedload(Order.payment)
+            )
+            .filter(Order.user_id == user_id)
+            .all()
+        )
+
+    @staticmethod
+    def buy_now(db: Session, request: BuyNowRequest, user_id: UUID):
+
+        product = db.query(Product).filter(Product.id == request.product_id).first()
+
+        if not product:
+            raise HTTPException(404, "Product not found")
+
+        total_price = product.price * request.quantity
+
+        order = Order(
+            user_id=user_id,
+            shipping_address=request.shipping_address,
+            payment_method=request.payment_method,
+            payment_status=PaymentStatus.UNPAID,
+            status=OrderStatus.PENDING,
+            total_price=total_price,
+            payos_order_code=generate_order_code()
+        )
+
+        db.add(order)
+        db.commit()
+        db.refresh(order)
+
+        db.add(OrderItem(
+            order_id=order.id,
+            product_id=product.id,
+            quantity=request.quantity,
+            price=product.price,
+            subtotal=total_price
+        ))
+
+        db.commit()
+        return order
+
+    @staticmethod
+    def create_order_by_user(db: Session, request: CreateOrderFromCartRequest, user_id: UUID):
+
+        cart = db.query(Cart).filter(Cart.user_id == user_id).first()
+
+        if not cart or not cart.cart_items:
+            raise HTTPException(400, "Cart is empty")
+
+        total_price = sum(
+            item.price * item.quantity for item in cart.cart_items
+        )
+
+        order = Order(
+            user_id=user_id,
+            shipping_address=request.shipping_address,
+            payment_method=request.payment_method,
+            payment_status=PaymentStatus.UNPAID,
+            status=OrderStatus.PENDING,
+            total_price=total_price,
+            payos_order_code=generate_order_code()
+        )
+
+        db.add(order)
+        db.flush()
+
+        items = [
+            OrderItem(
+                order_id=order.id,
+                product_id=i.product_id,
+                quantity=i.quantity,
+                price=i.price,
+                subtotal=i.price * i.quantity
+            )
+            for i in cart.cart_items
+        ]
+
+        db.add_all(items)
+
+        db.commit()
+        db.refresh(order)
+
+        return order
