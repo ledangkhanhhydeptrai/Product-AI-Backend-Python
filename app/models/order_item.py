@@ -8,34 +8,15 @@ import uuid
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
-    )
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    order_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("orders.id")
-    )
-
-    product_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("products.id")
-    )
+    order_id = Column(UUID(as_uuid=True), ForeignKey("orders.id"))
+    product_id = Column(UUID(as_uuid=True), ForeignKey("products.id"))
 
     quantity = Column(Integer, default=1)
-
     price = Column(Float, nullable=False)
-
     subtotal = Column(Float, nullable=False)
 
-    order = relationship(
-        "Order",
-        back_populates="order_items"
-    )
+    order = relationship("Order", back_populates="order_items")
 
-    product = relationship(
-        "Product",
-        back_populates="order_items"
-    )
+    product = relationship("Product", back_populates="order_items")
