@@ -1,8 +1,11 @@
-from sqlalchemy import Column, String, ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
-from app.core.database import Base
+from datetime import datetime
 import uuid
+
+from sqlalchemy import Column, String, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from app.core.database import Base
 
 
 class AIChatHistory(Base):
@@ -16,12 +19,24 @@ class AIChatHistory(Base):
 
     user_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("users.id")
+        ForeignKey("users.id"),
+        nullable=False
     )
 
-    message = Column(String, nullable=False)
+    role = Column(
+        String,
+        nullable=False
+    )
 
-    response = Column(String, nullable=False)
+    content = Column(
+        String,
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
 
     user = relationship(
         "User",

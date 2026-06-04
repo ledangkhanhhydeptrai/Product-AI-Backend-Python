@@ -1,4 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+import datetime
+
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -23,7 +25,7 @@ class Review(Base):
         UUID(as_uuid=True),
         ForeignKey("products.id")
     )
-
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
     rating = Column(Integer, nullable=False)
 
     comment = Column(String)

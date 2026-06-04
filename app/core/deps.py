@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from app.core.security import verify_access_token
 
 security = HTTPBearer()
+optional_security = HTTPBearer(auto_error=False)
 
 
 class CurrentUser(BaseModel):
@@ -34,3 +35,27 @@ def get_current_user(
         id=user_id,
         role=role
     )
+
+
+def get_optional_current_user(
+        credentials: HTTPAuthorizationCredentials | None = Depends(optional_security)
+):
+    if credentials is None:
+        return None
+
+    try:
+        token = credentials.credentials
+        payload = verify_access_token(token)
+
+        user_id = payload.get("sub")
+        role = payload.get("role")
+
+        if not user_id:
+            return None
+
+        return CurrentUser(
+            id=user_id,
+            role=role
+        )
+    except Exception:
+        return None
