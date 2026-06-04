@@ -1,26 +1,58 @@
 import time
 from uuid import UUID
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.order import Order
 from app.models.payment import Payment
+
+from app.enum.order_status import OrderStatus
 from app.enum.payment_method_status import PaymentMethod
 from app.enum.payment_status import PaymentStatus
+
 from app.services.pay_os_service import PayOSService
 
 
 class PaymentService:
 
     @staticmethod
-    def create_payment(db: Session, order_id: UUID, payment_method: PaymentMethod):
+    def get_payment_by_order_id(db: Session, order_id: UUID):
+        return (
+            db.query(Payment)
+            .filter(Payment.order_id == order_id)
+            .order_by(Payment.created_at.desc())
+            .first()
+        )
 
-        order = db.query(Order).filter(Order.id == order_id).first()
+    @staticmethod
+    def create_payment(
+            db: Session,
+            order_id: UUID,
+            payment_method: PaymentMethod
+    ):
+        order = (
+            db.query(Order)
+            .filter(Order.id == order_id)
+            .first()
+        )
 
         if not order:
-            raise HTTPException(404, "Order not found")
+            raise HTTPException(
+                status_code=404,
+                detail="Order not found"
+            )
 
-        # ⚠️ FIX: auto generate nếu thiếu
+        # Không tạo payment trùng
+        existing_payment = (
+            db.query(Payment)
+            .filter(Payment.order_id == order_id)
+            .first()
+        )
+
+        if existing_payment:
+            return existing_payment
+
         if not order.payos_order_code:
             order.payos_order_code = int(time.time() * 1000)
             db.commit()
@@ -37,7 +69,6 @@ class PaymentService:
         db.commit()
         db.refresh(payment)
 
-        # PAYOS FLOW
         if payment_method == PaymentMethod.PAYOS:
             checkout_url = PayOSService.create_link(
                 order_code=order.payos_order_code,
@@ -53,15 +84,40 @@ class PaymentService:
         return payment
 
     @staticmethod
-    def payment_success(db: Session, payment_id: UUID, transaction_id: str):
-
-        payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    def payment_success(
+            db: Session,
+            payment_id: UUID,
+            transaction_id: str
+    ):
+        payment = (
+            db.query(Payment)
+            .filter(Payment.id == payment_id)
+            .first()
+        )
 
         if not payment:
-            raise HTTPException(404, "Payment not found")
+            raise HTTPException(
+                status_code=404,
+                detail="Payment not found"
+            )
+
+        order = (
+            db.query(Order)
+            .filter(Order.id == payment.order_id)
+            .first()
+        )
+
+        if not order:
+            raise HTTPException(
+                status_code=404,
+                detail="Order not found"
+            )
 
         payment.status = PaymentStatus.PAID
         payment.transaction_id = transaction_id
+
+        order.payment_status = PaymentStatus.PAID
+        order.status = OrderStatus.PROCESSING
 
         db.commit()
         db.refresh(payment)
@@ -69,14 +125,38 @@ class PaymentService:
         return payment
 
     @staticmethod
-    def payment_failed(db: Session, payment_id: UUID):
-
-        payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    def payment_failed(
+            db: Session,
+            payment_id: UUID
+    ):
+        payment = (
+            db.query(Payment)
+            .filter(Payment.id == payment_id)
+            .first()
+        )
 
         if not payment:
-            raise HTTPException(404, "Payment not found")
+            raise HTTPException(
+                status_code=404,
+                detail="Payment not found"
+            )
+
+        order = (
+            db.query(Order)
+            .filter(Order.id == payment.order_id)
+            .first()
+        )
+
+        if not order:
+            raise HTTPException(
+                status_code=404,
+                detail="Order not found"
+            )
 
         payment.status = PaymentStatus.FAILED
+
+        order.payment_status = PaymentStatus.FAILED
+        order.status = OrderStatus.CANCELLED
 
         db.commit()
         db.refresh(payment)

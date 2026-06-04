@@ -1,5 +1,7 @@
 import uuid
-from sqlalchemy import Column, Float, String, Enum, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import Column, Float, String, Enum, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -26,3 +28,5 @@ class Payment(Base):
     checkout_url = Column(String, nullable=True)
 
     order = relationship("Order", back_populates="payment")
+
+    created_at = Column(DateTime, default=datetime.utcnow())

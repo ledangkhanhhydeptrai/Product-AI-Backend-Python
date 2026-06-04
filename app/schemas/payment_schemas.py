@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -11,7 +10,7 @@ class PaymentResponse(BaseModel):
     id: UUID
     amount: float
     payment_method: PaymentMethod
-    status: str
+    status: PaymentStatus
     transaction_id: str | None
     checkout_url: str | None
 
@@ -20,7 +19,7 @@ class PaymentResponse(BaseModel):
 
 class PaymentWebhookRequest(BaseModel):
     payment_id: UUID
-    transaction_id: UUID
+    transaction_id: str
 
 
 class CreatePaymentResponse(BaseModel):
