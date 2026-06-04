@@ -1,21 +1,40 @@
-from fastapi import APIRouter
+from uuid import UUID
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from app.response.ApiResponse import ApiResponse
-from app.services.ollama_service import chat_with_ai
-from app.schemas.chat_schema import ChatRequest
+
+from app.schemas.chat_schema import ChatRequest, AIResponse
+from app.getDatabase.getAllDatabase import get_db
+
+from app.services.chat_service import ChatService
+from app.core.deps import CurrentUser, get_optional_current_user
 
 router = APIRouter(
-    prefix="/chat",
+    prefix="/api",
     tags=["Chat"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.post("/", response_model=ApiResponse)
-def chat(req: ChatRequest):
-    response = chat_with_ai(req.message)
-    return ApiResponse(
-        status=200,
-        message="Trả kết quả thành công",
-        data=response
-    )
+@router.get("/chat", response_model=ApiResponse[list[AIResponse]])
+def get_all_chat(db: Session = Depends(get_db)):
+    chat = ChatService.get_all_chat(db)
+    return {
+        "status": 200,
+        "message": "Get all chat Successfully",
+        "data": chat
+    }
+
+
+@router.post("/chat/create", response_model=ApiResponse)
+def chat(req: ChatRequest, current_user: CurrentUser | None = Depends(get_optional_current_user),
+         db: Session = Depends(get_db)):
+    user_id = current_user.id if current_user else None
+    response = ChatService.chat(req=req, user_id=user_id, db=db)
+    return {
+        "status": 200,
+        "message": "Create Successfully",
+        "data": response
+    }
