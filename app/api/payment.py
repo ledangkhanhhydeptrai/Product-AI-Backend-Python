@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Form, Path
+from fastapi import APIRouter, Depends, Form
 
 from sqlalchemy.orm import Session
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api", tags=["Payment"])
 
 @router.get("/payment/{order_id}", response_model=ApiResponse[PaymentResponse],
             dependencies=[Depends(require_role(Role.USER))])
-def get_all_payment(order_id: UUID, db: Session = Depends(get_db), ):
+def get_payment(order_id: UUID, db: Session = Depends(get_db), ):
     payment = PaymentService.get_payment_by_order_id(db=db, order_id=order_id)
     return {
         "status": 200,
@@ -56,5 +56,23 @@ def payment_success(
     return {
         "status": 200,
         "message": "Success Payment Successfully",
+        "data": payment
+    }
+
+
+@router.post(
+    "/payment/failed/{payment_id}",
+    response_model=ApiResponse[PaymentResponse],
+    dependencies=[Depends(require_role(Role.USER))]
+)
+def payment_failed(
+        payment_id: UUID,
+        db: Session = Depends(get_db),
+):
+    payment = PaymentService.payment_failed(db, payment_id)
+
+    return {
+        "status": 200,
+        "message": "Payment Failed",
         "data": payment
     }
