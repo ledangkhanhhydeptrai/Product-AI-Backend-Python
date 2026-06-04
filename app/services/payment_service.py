@@ -11,6 +11,15 @@ from app.services.pay_os_service import PayOSService
 
 
 class PaymentService:
+    @staticmethod
+    def get_payment_by_order_id(db: Session, order_id: UUID):
+        payment = (
+            db.query(Payment)
+            .filter(Payment.order_id == order_id)
+            .order_by(Payment.created_at.desc())
+            .first()
+        )
+        return payment
 
     @staticmethod
     def create_payment(db: Session, order_id: UUID, payment_method: PaymentMethod):

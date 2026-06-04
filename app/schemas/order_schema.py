@@ -1,12 +1,10 @@
 from datetime import datetime
-from typing import Optional
+
 from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.enum.order_status import OrderStatus
 from app.enum.payment_method_status import PaymentMethod
-from app.schemas.payment_schemas import PaymentResponse
 
 
 class OrderItem(BaseModel):
@@ -29,8 +27,7 @@ class OrderResponse(BaseModel):
     payment_method: str
     created_at: datetime
 
-    payment: PaymentResponse | None = None
-    order_items: list[OrderItem]   # ✅ FIX
+    order_items: list[OrderItem]  # ✅ FIX
 
     model_config = {"from_attributes": True}
 
