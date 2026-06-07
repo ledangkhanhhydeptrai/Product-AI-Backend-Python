@@ -45,7 +45,7 @@ class AuthService:
                                 detail="Invalid credentials")
         token = create_access_token({"sub": str(user.id), "role": user.role.lower()})
         response.set_cookie(
-            key="token",
+            key="access_token",
             value=token,
             httponly=True,
             samesite="lax",
@@ -56,7 +56,11 @@ class AuthService:
             status=200,
             message="User login successfully",
             data={
-                "token": token,
-                "role": user.role
+                "user": {
+                    "id": str(user.id),
+                    "role": user.role,
+                    "email": user.email
+                },
+                "authenticated": True
             }
         )
