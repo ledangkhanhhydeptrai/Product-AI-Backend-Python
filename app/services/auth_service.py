@@ -1,4 +1,4 @@
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile, Response
 
 from sqlalchemy.orm import Session
 
@@ -35,7 +35,7 @@ class AuthService:
         )
 
     @staticmethod
-    def login(db: Session, request):
+    def login(db: Session, request, response: Response):
         user = db.query(User).filter(User.email == request.email).first()
         if not user:
             raise HTTPException(status_code=400, detail="Invalid credentials")
@@ -44,11 +44,19 @@ class AuthService:
             raise HTTPException(status_code=400,
                                 detail="Invalid credentials")
         token = create_access_token({"sub": str(user.id), "role": user.role.lower()})
+        response.set_cookie(
+            key="token",
+            value=token,
+            httponly=True,
+            samesite="lax",
+            secure=False,
+            max_age=60 * 60 * 24 * 7
+        )
         return ApiResponse(
             status=200,
             message="User login successfully",
             data={
                 "token": token,
-                "role": user.role.lower()
+                "role": user.role
             }
         )
