@@ -6,6 +6,8 @@ from app.schemas.auth_schema import RegisterRequest, LoginRequest
 from app.services.auth_service import AuthService
 from app.core.security import verify_access_token, create_access_token, verify_password
 from app.models.user import User
+from app.core.deps import get_current_user
+from app.response.ApiResponse import ApiResponse
 
 router = APIRouter(
     prefix="/api",
@@ -51,6 +53,26 @@ def debug_me(request: Request):
         "authenticated": True,
         "user": payload
     }
+
+
+@router.get("/me")
+def get_me(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    print("=== HIT ME API ===")
+    user = db.query(User).filter(User.id == current_user.id).first()
+    print("DB USER =", user)
+    print("COOKIE:", request.cookies)
+    print("CURRENT USER =", current_user)
+    return ApiResponse(
+        status=200,
+        message="Get profile successfully",
+        data={
+            "id": str(user.id),
+            "fullName": user.full_name,
+            "email": user.email,
+            "avatarUrl": user.avatar,
+            "role": user.role
+        }
+    )
 
 
 @router.post("/auth/login-debug")
