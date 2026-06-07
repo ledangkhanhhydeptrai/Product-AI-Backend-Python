@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Response
 from sqlalchemy.orm import Session
 
 from app.getDatabase.getAllDatabase import get_db
@@ -6,13 +6,13 @@ from app.schemas.auth_schema import RegisterRequest, LoginRequest
 from app.services.auth_service import AuthService
 
 router = APIRouter(
-    prefix="/auth",
+    prefix="/api",
     tags=["Authentication"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.post("/register", summary="")
+@router.post("/auth/register", summary="")
 def register(fullname: str = Form(...),
              email: str = Form(...),
              password: str = Form(...),
@@ -28,6 +28,10 @@ def register(fullname: str = Form(...),
     return AuthService.register(db, request, file)
 
 
-@router.post("/login", summary="")
-def login(request: LoginRequest, db: Session = Depends(get_db)):
-    return AuthService.login(db, request)
+@router.post("/auth/login", summary="")
+def login(request: LoginRequest, response: Response, db: Session = Depends(get_db)):
+    return AuthService.login(
+        db=db,
+        request=request,
+        response=response
+    )

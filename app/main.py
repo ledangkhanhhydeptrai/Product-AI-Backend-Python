@@ -2,6 +2,7 @@ import uvicorn
 
 from fastapi import FastAPI, HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.chat import router as chat_router
 from app.api.auth import router as auth_router
@@ -57,6 +58,15 @@ app.include_router(cart_router)
 app.include_router(order_router)
 app.include_router(payment_router)
 app.include_router(review_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 Base.metadata.create_all(bind=engine)
 
 if __name__ == '__main__':
