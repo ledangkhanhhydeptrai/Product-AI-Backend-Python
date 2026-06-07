@@ -48,9 +48,9 @@ class AuthService:
             key="access_token",
             value=token,
             httponly=True,
-            samesite="lax",
             secure=False,
-            max_age=60 * 60 * 24 * 7
+            samesite="lax",
+            path="/"
         )
         return ApiResponse(
             status=200,
