@@ -98,3 +98,35 @@ def login_debug(request: LoginRequest, db: Session = Depends(get_db)):
             "email": user.email
         }
     }
+
+
+@router.post("/auth/logout", response_model=ApiResponse[None])
+def logout(
+    response: Response,
+    db: Session = Depends(get_db)
+):
+    # ❌ Không cần request.cookies nếu chỉ logout
+
+    # ✅ Xóa cookie access_token
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        httponly=True,
+        samesite="lax",
+        secure=False  # đổi True nếu production HTTPS
+    )
+
+    # (optional) nếu bạn có refresh_token
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+        httponly=True,
+        samesite="lax",
+        secure=False
+    )
+
+    return ApiResponse(
+        status=200,
+        message="Logout successful",
+        data=None
+    )
