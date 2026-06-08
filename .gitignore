@@ -1,12 +1,57 @@
-# env files
+# =====================
+# ENV FILES (SECRETS)
+# =====================
 .env
 .env.*
+**/.env
+**/.env.*
 
-# virtual env
+# =====================
+# VIRTUAL ENV
+# =====================
 venv/
 env/
 .venv/
+**/venv/
+**/env/
+**/.venv/
 
-# python cache
+# =====================
+# PYTHON CACHE
+# =====================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# =====================
+# LOG FILES
+# =====================
+*.log
+
+# =====================
+# IDE / EDITOR
+# =====================
+.vscode/
+.idea/
+*.swp
+
+# =====================
+# OS FILES
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# NODE (nếu fullstack)
+# =====================
+node_modules/
+dist/
+build/
+
+# =====================
+# TEST / COVERAGE
+# =====================
+.pytest_cache/
+.coverage
+htmlcov/
