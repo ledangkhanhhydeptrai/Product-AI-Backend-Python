@@ -18,6 +18,7 @@ class ProductResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     has_embedding: bool
+    image_url: str
 
     class Config:
         from_attributes = True
@@ -40,6 +41,7 @@ class ProductListResponse(BaseModel):
     name: str
     price: float
     thumbnail: str
+    image_url: str
 
 
 class ProductUpdateRequest(BaseModel):

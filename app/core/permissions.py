@@ -2,22 +2,20 @@ from fastapi import Depends, HTTPException, status
 
 from app.core.deps import get_current_user
 from app.core.enums import Role
+from app.core.deps import CurrentUser
 
 
-def require_admin(user=Depends(get_current_user)):
-    role = Role(user["role"])
+def require_admin(user: CurrentUser = Depends(get_current_user)):
+    role = Role(user.role)
 
     if role != Role.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin only"
-        )
+        raise HTTPException(status_code=403, detail="Forbidden")
 
     return user
 
 
 def require_staff(user=Depends(get_current_user)):
-    role = Role(user["role"])
+    role = Role(user.role)
     if role not in [Role.ADMIN, Role.STAFF]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
