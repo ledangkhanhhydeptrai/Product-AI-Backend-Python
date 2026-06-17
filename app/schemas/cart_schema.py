@@ -27,3 +27,18 @@ class CartResponse(BaseModel):
 class AddCartRequest(BaseModel):
     product_id: UUID
     quantity: int
+
+
+class UpdateCartRequest(BaseModel):
+    quantity: int
+
+
+class UpdateCartItemResponse(BaseModel):
+    cart_id: UUID
+    product_id: UUID
+    quantity: int
+    price: float
+    subtotal: float
+
+    class Config:
+        from_attributes = True
