@@ -4,12 +4,11 @@ from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import Session
 
 from app.response.ApiResponse import ApiResponse
-from app.schemas.cart_schema import CartResponse
+from app.schemas.cart_schema import CartResponse,AddCartRequest,UpdateCartRequest,UpdateCartItemResponse
 from app.services.cart_service import CartService
 from app.getDatabase.getAllDatabase import get_db
 from app.core.deps import get_current_user
 from app.models.user import User
-from app.schemas.cart_schema import AddCartRequest
 
 router = APIRouter(
     prefix="/api",
@@ -48,22 +47,34 @@ def add_to_cart(
     }
 
 
-@router.put("/cart/{id}", response_model=ApiResponse[CartResponse])
-def update_cart(request: AddCartRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+from uuid import UUID
+
+
+@router.put("/cart/product/{product_id}", response_model=ApiResponse[CartResponse])
+def update_cart(
+        product_id: UUID,
+        request: UpdateCartRequest,
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user)
+):
     result = CartService.update_quantity(
-        db=db, user_id=user.id, product_id=request.product_id, quantity=request.quantity)
+        db=db,
+        user_id=user.id,
+        product_id=product_id,
+        quantity=request.quantity
+    )
+
     return {
         "status": 200,
         "message": "Update Successfully",
         "data": result
     }
 
-
 @router.delete("/cart/{product_id}")
 def delete_cart(db: Session = Depends(get_db), user: User = Depends(get_current_user), product_id: UUID = Path(...)):
-    result = CartService.remove_item(db=db, user_id=user.id, product_id=product_id)
+    CartService.remove_item(db=db, user_id=user.id, product_id=product_id)
     return {
         "status": 200,
         "message": "Deleted Successfully",
-        "data": result
+        "data": None
     }

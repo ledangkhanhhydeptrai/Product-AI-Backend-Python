@@ -51,28 +51,32 @@ class CartService:
     @staticmethod
     def update_quantity(db: Session, user_id: UUID, product_id: UUID, quantity: int):
 
-        # 1. Get cart (NOT CartItem)
+        if quantity <= 0:
+            raise ValueError("Quantity must be greater than 0")
+
+        # 1. Get or create cart
         cart = db.query(Cart).filter(Cart.user_id == user_id).first()
 
-        # 2. Auto create cart if not exists
         if not cart:
             cart = Cart(user_id=user_id)
             db.add(cart)
-            db.commit()
-            db.refresh(cart)
+            db.flush()  # better than commit here
 
-        # 3. Find cart item
+        # 2. Check product exists
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            raise Exception("Product not found")
+
+        # 3. Find item
         item = db.query(CartItem).filter(
             CartItem.cart_id == cart.id,
             CartItem.product_id == product_id
         ).first()
 
-        # 4. Update or create
+        # 4. Upsert logic (SET quantity)
         if item:
-            item.quantity += quantity
+            item.quantity = quantity
         else:
-            product = db.query(Product).filter(Product.id == product_id).first()
-
             item = CartItem(
                 cart_id=cart.id,
                 product_id=product_id,
@@ -82,7 +86,6 @@ class CartService:
             db.add(item)
 
         db.commit()
-        db.refresh(cart)
 
         return cart
 
@@ -99,4 +102,4 @@ class CartService:
         ).delete()
 
         db.commit()
-        return {"success": True}
+        return None
