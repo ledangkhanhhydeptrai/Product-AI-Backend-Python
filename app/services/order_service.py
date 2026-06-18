@@ -12,6 +12,7 @@ from app.models.cart import Cart
 from app.enum.order_status import OrderStatus
 from app.enum.payment_status import PaymentStatus
 from app.schemas.order_schema import BuyNowRequest, CreateOrderFromCartRequest
+from app.models.cart_item import CartItem
 
 
 def generate_order_code():
@@ -70,13 +71,17 @@ class OrderService:
     @staticmethod
     def create_order_by_user(db: Session, request: CreateOrderFromCartRequest, user_id: UUID):
 
-        cart = db.query(Cart).filter(Cart.user_id == user_id).first()
+        cart_items = (db.query(CartItem)
+                      .join(Cart, Cart.id == CartItem.cart_id)
+                      .filter(Cart.user_id == user_id, CartItem.id.in_(
+            request.cart_item_ids))
+                      .all())
 
-        if not cart or not cart.cart_items:
-            raise HTTPException(400, "Cart is empty")
+        if not cart_items:
+            raise HTTPException(400, "No cart items selected")
 
         total_price = sum(
-            item.price * item.quantity for item in cart.cart_items
+            item.price * item.quantity for item in cart_items
         )
 
         order = Order(
@@ -100,7 +105,7 @@ class OrderService:
                 price=i.price,
                 subtotal=i.price * i.quantity
             )
-            for i in cart.cart_items
+            for i in cart_items
         ]
 
         db.add_all(items)

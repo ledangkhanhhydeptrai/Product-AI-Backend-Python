@@ -33,6 +33,7 @@ class OrderResponse(BaseModel):
 
 
 class CreateOrderFromCartRequest(BaseModel):
+    cart_item_ids: list[UUID]
     shipping_address: str
     payment_method: PaymentMethod
 

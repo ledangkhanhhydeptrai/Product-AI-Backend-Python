@@ -1,5 +1,10 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
+from uuid import UUID
+
+from starlette.requests import Request
 
 from app.getDatabase.getAllDatabase import get_db
 
@@ -27,22 +32,17 @@ def get_all_order(user=Depends(get_current_user), db: Session = Depends(get_db))
 
 
 @router.post("/order/cart", response_model=ApiResponse[OrderResponse])
-def create_order_from_cart(shipping_address: str = Form(...),
-                           payment_method: PaymentMethod = Form(...), user=Depends(get_current_user),
-                           db: Session = Depends(get_db)):
-    request = CreateOrderFromCartRequest(
-        shipping_address=shipping_address,
-        payment_method=payment_method,
-    )
+def create_order_from_cart(
+    request: CreateOrderFromCartRequest,
+    user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     order = OrderService.create_order_by_user(db=db, user_id=user.id, request=request)
     return {
         "status": 201,
         "message": "Create Order Successfully",
         "data": order
     }
-
-
-from uuid import UUID
 
 
 @router.post("/order/buy-now", response_model=ApiResponse[OrderResponse])
