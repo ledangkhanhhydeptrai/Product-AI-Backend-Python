@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import Session
 
 from app.response.ApiResponse import ApiResponse
-from app.schemas.cart_schema import CartResponse,AddCartRequest,UpdateCartRequest,UpdateCartItemResponse
+from app.schemas.cart_schema import CartResponse, AddCartRequest, UpdateCartRequest, UpdateCartItemResponse
 from app.services.cart_service import CartService
 from app.getDatabase.getAllDatabase import get_db
 from app.core.deps import get_current_user
@@ -70,9 +70,10 @@ def update_cart(
         "data": result
     }
 
-@router.delete("/cart/{product_id}")
-def delete_cart(db: Session = Depends(get_db), user: User = Depends(get_current_user), product_id: UUID = Path(...)):
-    CartService.remove_item(db=db, user_id=user.id, product_id=product_id)
+
+@router.delete("/cart/{cart_item_id}")
+def delete_cart(db: Session = Depends(get_db), user: User = Depends(get_current_user), cart_item_id: UUID = Path(...)):
+    CartService.remove_item(db=db, user_id=user.id, cart_item_id=cart_item_id)
     return {
         "status": 200,
         "message": "Deleted Successfully",
