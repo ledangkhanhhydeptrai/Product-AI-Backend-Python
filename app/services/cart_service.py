@@ -90,16 +90,18 @@ class CartService:
         return cart
 
     @staticmethod
-    def remove_item(db: Session, user_id: UUID, product_id: UUID):
-
+    def remove_item(db: Session, user_id: UUID, cart_item_id: UUID):
         cart = db.query(Cart).filter(Cart.user_id == user_id).first()
         if not cart:
             return {"success": True}
+        cart_item = db.query(CartItem).filter(
+            CartItem.id == cart_item_id,
+            CartItem.cart_id == cart.id
+        ).first()
 
-        db.query(CartItem).filter(
-            CartItem.cart_id == cart.id,
-            CartItem.product_id == product_id
-        ).delete()
+        if not cart_item:
+            return {"success": False, "message": "Cart item not found"}
 
+        db.delete(cart_item)
         db.commit()
         return None
