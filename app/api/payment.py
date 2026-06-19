@@ -8,7 +8,6 @@ from app.getDatabase.getAllDatabase import get_db
 from app.services.payment_service import PaymentService
 
 from app.response.ApiResponse import ApiResponse
-from app.enum.payment_method_status import PaymentMethod
 from app.schemas.payment_schemas import PaymentResponse
 from app.core.enums import Role
 from app.core.dependencies import require_role
@@ -31,13 +30,11 @@ def get_payment(order_id: UUID, db: Session = Depends(get_db), ):
              dependencies=[Depends(require_role(Role.USER))])
 def create_payment(
         order_id: UUID,
-        payment_method: PaymentMethod = Form(...),
         db: Session = Depends(get_db)
 ):
     payment = PaymentService.create_payment(
         db=db,
         order_id=order_id,
-        payment_method=payment_method
     )
 
     return {

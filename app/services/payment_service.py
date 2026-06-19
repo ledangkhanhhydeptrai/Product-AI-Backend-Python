@@ -29,7 +29,6 @@ class PaymentService:
     def create_payment(
             db: Session,
             order_id: UUID,
-            payment_method: PaymentMethod
     ):
         order = (
             db.query(Order)
@@ -61,15 +60,15 @@ class PaymentService:
         payment = Payment(
             order_id=order.id,
             amount=order.total_price,
-            payment_method=payment_method,
-            status=PaymentStatus.UNPAID
+            status=PaymentStatus.UNPAID,
+            payment_method=PaymentMethod.PAYOS,
         )
 
         db.add(payment)
         db.commit()
         db.refresh(payment)
 
-        if payment_method == PaymentMethod.PAYOS:
+        if order.payment_method == PaymentMethod.PAYOS:
             checkout_url = PayOSService.create_link(
                 order_code=order.payos_order_code,
                 amount=int(order.total_price),
