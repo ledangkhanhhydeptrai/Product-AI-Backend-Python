@@ -50,6 +50,8 @@ class PaymentService:
         )
 
         if existing_payment:
+            print("FOUND PAYMENT")
+            print(existing_payment.checkout_url)
             return existing_payment
 
         if not order.payos_order_code:
@@ -76,33 +78,20 @@ class PaymentService:
             )
 
             payment.checkout_url = checkout_url
-
+            print("PAYOS URL =", checkout_url)
             db.commit()
             db.refresh(payment)
-
+            print("AFTER REFRESH =", payment.checkout_url)
         return payment
 
     @staticmethod
     def payment_success(
             db: Session,
-            payment_id: UUID,
-            transaction_id: str
+            order_code: int
     ):
-        payment = (
-            db.query(Payment)
-            .filter(Payment.id == payment_id)
-            .first()
-        )
-
-        if not payment:
-            raise HTTPException(
-                status_code=404,
-                detail="Payment not found"
-            )
-
         order = (
             db.query(Order)
-            .filter(Order.id == payment.order_id)
+            .filter(Order.payos_order_code == order_code)
             .first()
         )
 
@@ -112,8 +101,22 @@ class PaymentService:
                 detail="Order not found"
             )
 
+        payment = (
+            db.query(Payment)
+            .filter(Payment.order_id == order.id)
+            .first()
+        )
+
+        if not payment:
+            raise HTTPException(
+                status_code=404,
+                detail="Payment not found"
+            )
+
         payment.status = PaymentStatus.PAID
-        payment.transaction_id = transaction_id
+
+        # transaction_id lưu orderCode luôn
+        payment.transaction_id = str(order_code)
 
         order.payment_status = PaymentStatus.PAID
         order.status = OrderStatus.PROCESSING
@@ -126,23 +129,11 @@ class PaymentService:
     @staticmethod
     def payment_failed(
             db: Session,
-            payment_id: UUID
+            order_code: int
     ):
-        payment = (
-            db.query(Payment)
-            .filter(Payment.id == payment_id)
-            .first()
-        )
-
-        if not payment:
-            raise HTTPException(
-                status_code=404,
-                detail="Payment not found"
-            )
-
         order = (
             db.query(Order)
-            .filter(Order.id == payment.order_id)
+            .filter(Order.payos_order_code == order_code)
             .first()
         )
 
@@ -150,6 +141,18 @@ class PaymentService:
             raise HTTPException(
                 status_code=404,
                 detail="Order not found"
+            )
+
+        payment = (
+            db.query(Payment)
+            .filter(Payment.order_id == order.id)
+            .first()
+        )
+
+        if not payment:
+            raise HTTPException(
+                status_code=404,
+                detail="Payment not found"
             )
 
         payment.status = PaymentStatus.FAILED
