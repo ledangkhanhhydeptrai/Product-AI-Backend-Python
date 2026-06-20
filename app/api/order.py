@@ -4,8 +4,6 @@ from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from starlette.requests import Request
-
 from app.getDatabase.getAllDatabase import get_db
 
 from app.response.ApiResponse import ApiResponse
@@ -13,6 +11,9 @@ from app.schemas.order_schema import OrderResponse, BuyNowRequest, CreateOrderFr
 from app.services.order_service import OrderService
 from app.core.deps import get_current_user
 from app.enum.payment_method_status import PaymentMethod
+from app.core.dependencies import require_role
+from app.core.enums import Role
+from app.schemas.order_schema import UpdateOrderRequest
 
 router = APIRouter(
     prefix="/api",
@@ -33,9 +34,9 @@ def get_all_order(user=Depends(get_current_user), db: Session = Depends(get_db))
 
 @router.post("/order/cart", response_model=ApiResponse[OrderResponse])
 def create_order_from_cart(
-    request: CreateOrderFromCartRequest,
-    user=Depends(get_current_user),
-    db: Session = Depends(get_db)
+        request: CreateOrderFromCartRequest,
+        user=Depends(get_current_user),
+        db: Session = Depends(get_db)
 ):
     order = OrderService.create_order_by_user(db=db, user_id=user.id, request=request)
     return {
@@ -70,5 +71,26 @@ def buy_now(
     return {
         "status": 201,
         "message": "Buy Now Successfully",
+        "data": order
+    }
+
+
+@router.put(
+    "/admin/order",
+    response_model=ApiResponse[OrderResponse],
+)
+def update_order_by_admin(
+        request: UpdateOrderRequest,
+        db: Session = Depends(get_db),
+        _: dict = Depends(require_role(Role.ADMIN))
+):
+    order = OrderService.update_order_by_admin(
+        db=db,
+        request=request
+    )
+
+    return {
+        "status": 200,
+        "message": "Order updated successfully",
         "data": order
     }
