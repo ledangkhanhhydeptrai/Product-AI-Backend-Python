@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import Optional
 
 from uuid import UUID
 
 from pydantic import BaseModel
 
 from app.enum.payment_method_status import PaymentMethod
+from app.enum.order_status import OrderStatus
+from app.enum.payment_status import PaymentStatus
 
 
 class OrderItem(BaseModel):
@@ -43,3 +46,10 @@ class BuyNowRequest(BaseModel):
     quantity: int
     shipping_address: str
     payment_method: PaymentMethod
+
+class UpdateOrderRequest(BaseModel):
+    order_id: UUID
+    status: Optional[OrderStatus] = None
+    payment_status: Optional[PaymentStatus] = None
+    payment_method: Optional[PaymentMethod] = None
+    shipping_address: Optional[str] = None

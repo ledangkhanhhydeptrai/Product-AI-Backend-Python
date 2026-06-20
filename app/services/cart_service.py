@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import asc, null
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
 from app.models.cart import Cart

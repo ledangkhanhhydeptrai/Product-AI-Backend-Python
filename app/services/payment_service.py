@@ -12,6 +12,7 @@ from app.enum.payment_method_status import PaymentMethod
 from app.enum.payment_status import PaymentStatus
 
 from app.services.pay_os_service import PayOSService
+from app.models import Cart, CartItem, OrderItem
 
 
 class PaymentService:
@@ -94,6 +95,13 @@ class PaymentService:
             .filter(Order.payos_order_code == order_code)
             .first()
         )
+        order_items = (
+            db.query(OrderItem)
+            .filter(OrderItem.order_id == order.id)
+            .all()
+        )
+
+        product_ids = [item.product_id for item in order_items]
 
         if not order:
             raise HTTPException(
@@ -120,7 +128,17 @@ class PaymentService:
 
         order.payment_status = PaymentStatus.PAID
         order.status = OrderStatus.PROCESSING
+        cart = (
+            db.query(Cart)
+            .filter(Cart.user_id == order.user_id)
+            .first()
+        )
 
+        if cart:
+            db.query(CartItem).filter(
+                CartItem.cart_id == cart.id,
+                CartItem.product_id.in_(product_ids)
+            ).delete(synchronize_session=False)
         db.commit()
         db.refresh(payment)
 
