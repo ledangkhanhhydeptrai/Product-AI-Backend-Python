@@ -15,6 +15,40 @@ from app.core.dependencies import require_role
 router = APIRouter(prefix="/api", tags=["Payment"])
 
 
+@router.put("/payment-callback/success/{order_code}", response_model=ApiResponse[PaymentResponse],
+            dependencies=[Depends(require_role(Role.USER))])
+def payment_success(
+        order_code: int, db: Session = Depends(get_db),
+):
+    payment = PaymentService.payment_success(db, order_code)
+    return {
+        "status": 200,
+        "message": "Success Payment Successfully",
+        "data": payment
+    }
+
+
+@router.put(
+    "/payment-callback/failed/{order_code}",
+    response_model=ApiResponse[PaymentResponse],
+    dependencies=[Depends(require_role(Role.USER))]
+)
+def payment_failed(
+        order_code: int,
+        db: Session = Depends(get_db)
+):
+    payment = PaymentService.payment_failed(
+        db,
+        order_code
+    )
+
+    return {
+        "status": 200,
+        "message": "Payment Failed",
+        "data": payment
+    }
+
+
 @router.get("/payment/{order_id}", response_model=ApiResponse[PaymentResponse],
             dependencies=[Depends(require_role(Role.USER))])
 def get_payment(order_id: UUID, db: Session = Depends(get_db), ):
@@ -40,36 +74,5 @@ def create_payment(
     return {
         "status": 201,
         "message": "Create Payment Successfully",
-        "data": payment
-    }
-
-
-@router.post("/payment/success/{payment_id}/{transaction_id}", response_model=ApiResponse[PaymentResponse],
-             dependencies=[Depends(require_role(Role.USER))])
-def payment_success(
-        payment_id: UUID, transaction_id: str, db: Session = Depends(get_db),
-):
-    payment = PaymentService.payment_success(db, payment_id, transaction_id)
-    return {
-        "status": 200,
-        "message": "Success Payment Successfully",
-        "data": payment
-    }
-
-
-@router.post(
-    "/payment/failed/{payment_id}",
-    response_model=ApiResponse[PaymentResponse],
-    dependencies=[Depends(require_role(Role.USER))]
-)
-def payment_failed(
-        payment_id: UUID,
-        db: Session = Depends(get_db),
-):
-    payment = PaymentService.payment_failed(db, payment_id)
-
-    return {
-        "status": 200,
-        "message": "Payment Failed",
         "data": payment
     }
