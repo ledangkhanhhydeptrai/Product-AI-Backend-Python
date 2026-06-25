@@ -30,7 +30,7 @@ def get_brand(db: Session = Depends(get_db)):
              response_model=ApiResponse[BrandResponse], dependencies=[Depends(require_admin)])
 def create_brand(name: str = Form(...),
                  description: str = Form(...),
-                 file: UploadFile = File(...),
+                 logo: UploadFile = File(...),
                  db: Session = Depends(get_db),
                  ):
     brand = CreateBrandRequest(
@@ -44,7 +44,7 @@ def create_brand(name: str = Form(...),
         "data": BrandService.create_brand(
             db=db,
             brand=brand,
-            file=file
+            logo=logo
         )
     }
 

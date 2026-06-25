@@ -15,7 +15,7 @@ class BrandService:
         return db.query(Brand).order_by(asc(Brand.id)).all()
 
     @staticmethod
-    def create_brand(db: Session, brand: CreateBrandRequest, file: UploadFile):
+    def create_brand(db: Session, brand: CreateBrandRequest, logo: UploadFile):
         existing_brand = (
             db.query(Brand)
             .filter(Brand.name == brand.name)
@@ -23,7 +23,7 @@ class BrandService:
         )
         if existing_brand:
             raise HTTPException(status_code=400, detail="Brand Already Exists")
-        logo_url = UploadService.upload_image(file)
+        logo_url = UploadService.upload_image(logo)
         new_brand = Brand(
             name=brand.name,
             logo=logo_url,
