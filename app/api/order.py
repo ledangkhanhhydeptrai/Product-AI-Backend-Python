@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, Path
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -10,10 +10,12 @@ from app.response.ApiResponse import ApiResponse
 from app.schemas.order_schema import OrderResponse, BuyNowRequest, CreateOrderFromCartRequest
 from app.services.order_service import OrderService
 from app.core.deps import get_current_user
+
+from app.schemas.order_schema import UpdateOrderRequest
+from app.core.permissions import require_admin
 from app.enum.payment_method_status import PaymentMethod
 from app.core.dependencies import require_role
 from app.core.enums import Role
-from app.schemas.order_schema import UpdateOrderRequest
 
 router = APIRouter(
     prefix="/api",
@@ -76,17 +78,19 @@ def buy_now(
 
 
 @router.put(
-    "/admin/order",
+    "/admin/order/{id}",
     response_model=ApiResponse[OrderResponse],
+    dependencies=[Depends(require_admin)],
 )
 def update_order_by_admin(
         request: UpdateOrderRequest,
+        id: UUID = Path(...),
         db: Session = Depends(get_db),
-        _: dict = Depends(require_role(Role.ADMIN))
 ):
     order = OrderService.update_order_by_admin(
         db=db,
-        request=request
+        request=request,
+        id=id
     )
 
     return {
@@ -94,3 +98,11 @@ def update_order_by_admin(
         "message": "Order updated successfully",
         "data": order
     }
+
+
+@router.get(
+    "/admin/orders",
+    dependencies=[Depends(require_role(Role.ADMIN))]
+)
+def get_all_orders(db: Session = Depends(get_db)):
+    return OrderService.get_all_orders_admin(db)

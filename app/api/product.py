@@ -12,8 +12,7 @@ from app.schemas.product_schema import ProductResponse, ProductListResponse
 from app.response.ApiResponse import ApiResponse
 from app.core.permissions import require_admin
 from app.schemas.product_schema import ProductEmbeddingResponse
-from app.models.product_embedding import ProductEmbedding
-from app.services.embedding_service import EmbeddingService
+
 
 router = APIRouter(
     prefix="/api",
