@@ -105,4 +105,9 @@ def update_order_by_admin(
     dependencies=[Depends(require_role(Role.ADMIN))]
 )
 def get_all_orders(db: Session = Depends(get_db)):
-    return OrderService.get_all_orders_admin(db)
+    orderAdmin = OrderService.get_all_orders_admin(db)
+    return {
+        "status": 200,
+        "message": "Get All Orders Successfully",
+        "data": orderAdmin
+    }
