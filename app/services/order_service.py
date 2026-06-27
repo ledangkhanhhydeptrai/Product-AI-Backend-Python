@@ -117,63 +117,68 @@ class OrderService:
         return order
 
     @staticmethod
-    def update_order_by_admin(db: Session, request: UpdateOrderRequest):
+    def update_order_by_admin(db: Session, request: UpdateOrderRequest, id: UUID):
 
-        # 1. Get order
         order = (
             db.query(Order)
-            .filter(Order.id == request.order_id)
+            .options(joinedload(Order.user))
+            .filter(Order.id == id)
             .first()
         )
 
         if not order:
-            raise HTTPException(
-                status_code=404,
-                detail="Order not found"
-            )
+            raise HTTPException(status_code=404, detail="Order not found")
 
-        # 2. Không cho sửa đơn đã huỷ hoặc giao xong (tuỳ rule)
         if order.status in [OrderStatus.DELIVERED, OrderStatus.CANCELLED]:
             raise HTTPException(
                 status_code=400,
                 detail=f"Cannot update order with status {order.status}"
             )
 
-        # 3. Validate status transition
         VALID_TRANSITIONS = {
             OrderStatus.PENDING: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
             OrderStatus.PROCESSING: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
             OrderStatus.SHIPPED: [OrderStatus.DELIVERED],
         }
 
-        # 4. Update status (nếu có)
+        # STATUS
         if request.status is not None:
-            if request.status == order.status:
-                return order  # 👈 cho phép giữ nguyên trạng thái
-            allowed = VALID_TRANSITIONS.get(order.status, [])
+            if request.status != order.status:
+                allowed = VALID_TRANSITIONS.get(order.status, [])
 
-            if request.status not in allowed:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid status transition: {order.status} -> {request.status}"
-                )
+                if request.status not in allowed:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Invalid status transition: {order.status} -> {request.status}"
+                    )
 
-            order.status = request.status
+                order.status = request.status
 
-        # 5. Update payment status (nếu có)
+        # PAYMENT STATUS
         if request.payment_status is not None:
             order.payment_status = request.payment_status
 
-        # 6. Update payment method (nếu có)
+        # PAYMENT METHOD
         if request.payment_method is not None:
             order.payment_method = request.payment_method
 
-        # 7. Update shipping address (nếu có)
+        # SHIPPING ADDRESS
         if request.shipping_address is not None:
             order.shipping_address = request.shipping_address
 
-        # 8. Commit
         db.commit()
         db.refresh(order)
 
         return order
+
+    @staticmethod
+    def get_all_orders_admin(db: Session):
+        return (
+            db.query(Order)
+            .options(
+                joinedload(Order.order_items),
+                joinedload(Order.payment),
+                joinedload(Order.user)  # 👈 nếu muốn thấy khách hàng
+            )
+            .all()
+        )

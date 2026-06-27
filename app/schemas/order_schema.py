@@ -48,7 +48,6 @@ class BuyNowRequest(BaseModel):
     payment_method: PaymentMethod
 
 class UpdateOrderRequest(BaseModel):
-    order_id: UUID
     status: Optional[OrderStatus] = None
     payment_status: Optional[PaymentStatus] = None
     payment_method: Optional[PaymentMethod] = None
