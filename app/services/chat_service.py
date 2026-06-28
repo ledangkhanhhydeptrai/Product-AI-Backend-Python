@@ -1,3 +1,5 @@
+import time
+import re
 from uuid import UUID
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
@@ -13,86 +15,56 @@ class ChatService:
     def get_all_chat(db: Session):
         return (
             db.query(AIChatHistory)
-            .order_by(asc(AIChatHistory.id))
+            .order_by(asc(AIChatHistory.created_at))
             .all()
         )
 
     @staticmethod
     def chat(db: Session, req: ChatRequest, user_id: UUID):
+        products = db.query(Product).limit(2).all()
 
-        try:
-            # 1. Get products from DB
-            products = (
-                db.query(Product)
-                .limit(5)
-                .all()
+        product_context = "\n".join([
+            f"- {p.name} | {p.price:,} VND | stock: {p.stock}"
+            for p in products
+        ])
+
+        prompt = f"""
+        Bạn là trợ lý bán hàng.
+        Trả lời ngắn gọn tiếng Việt.
+
+        Sản phẩm:
+        {product_context}
+
+        User: {req.message}
+        """
+
+        # 👉 AI response
+        answer = chat_with_ai(prompt)
+        start = time.time()
+        answer = chat_with_ai(prompt)
+        print("AI TIME:", time.time() - start)
+        # 🔥 FIX NEWLINE (QUAN TRỌNG)
+        answer = re.sub(r"\\n", "\n", answer)  # convert literal \n -> real newline
+        answer = re.sub(r"\n{3,}", "\n\n", answer)  # normalize spacing
+
+        # 👉 save chat
+        db.add_all([
+            AIChatHistory(
+                user_id=user_id,
+                role="user",
+                content=req.message
+            ),
+            AIChatHistory(
+                user_id=user_id,
+                role="assistant",
+                content=answer
             )
+        ])
 
-            product_context = "\n".join([
-                f"- {p.name} | {p.price:,} VND | stock: {p.stock}"
-                for p in products
-            ])
+        db.commit()
 
-            # 2. Build prompt for AI
-            prompt = f"""
-            Bạn là hệ thống API.
-
-            🚨 QUY TẮC TUYỆT ĐỐI:
-            - CHỈ được trả về JSON
-            - KHÔNG được giải thích
-            - KHÔNG markdown
-            - KHÔNG text bên ngoài JSON
-            - KHÔNG \n, KHÔNG **, KHÔNG dấu câu ngoài JSON
-
-            📦 DATA:
-            {product_context}
-
-            👤 USER:
-            {req.message}
-
-            📤 OUTPUT FORMAT:
-            Trả về DUY NHẤT 1 JSON hợp lệ:
-
-            {{
-              "answer": string,
-              "products": [
-                {{
-                  "name": string,
-                  "price": number,
-                  "reason": string
-                }}
-              ]
-            }}
-            """
-
-            # 3. Call AI
-            answer = chat_with_ai(prompt)
-
-            # 4. Save chat history
-            messages = [
-                AIChatHistory(
-                    user_id=user_id,
-                    role="user",
-                    content=req.message
-                ),
-                AIChatHistory(
-                    user_id=user_id,
-                    role="assistant",
-                    content=answer
-                )
-            ]
-
-            db.add_all(messages)
-            db.commit()
-
-            return {
-                "message": req.message,
-                "response": answer
-            }
-
-        except Exception as e:
-            db.rollback()
-            return {
-                "message": req.message,
-                "error": str(e)
-            }
+        # 👉 return clean
+        return {
+            "message": req.message,
+            "answer": answer
+        }
