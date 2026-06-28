@@ -30,20 +30,20 @@ def get_all_chat(db: Session = Depends(get_db)):
 
 @router.post("/chat/create", response_model=ApiResponse)
 def chat(
-    req: ChatRequest,
-    current_user: CurrentUser | None = Depends(get_optional_current_user),
-    db: Session = Depends(get_db)
+        req: ChatRequest,
+        current_user: CurrentUser | None = Depends(get_optional_current_user),
+        db: Session = Depends(get_db)
 ):
     user_id = current_user.id if current_user else None
 
-    response = ChatService.chat(
+    result = ChatService.chat(
+        db=db,
         req=req,
-        user_id=user_id,
-        db=db
+        user_id=user_id
     )
 
-    return {
-        "status": 200,
-        "message": "Success",
-        "data": response
-    }
+    return ApiResponse(
+        status=200,
+        message="Success",
+        data=result
+    )
