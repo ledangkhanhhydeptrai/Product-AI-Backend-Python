@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.middleware.cors import CORSMiddleware
-
+from sqlalchemy import text
 from app.api.chat import router as chat_router
 from app.api.auth import router as auth_router
 from app.api.product import router as product_router
@@ -39,7 +39,13 @@ async def custom_swagger():
         openapi_url=app.openapi_url,
         title="Product AI"
     )
+@app.on_event("startup")
+def startup():
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.commit()
 
+    Base.metadata.create_all(bind=engine)
 
 app.add_exception_handler(
     HTTPException,
