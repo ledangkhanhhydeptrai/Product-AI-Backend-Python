@@ -48,20 +48,20 @@ class ChatService:
         answer = re.sub(r"\n{3,}", "\n\n", answer)  # normalize spacing
 
         # 👉 save chat
-        db.add_all([
-            AIChatHistory(
-                user_id=user_id,
-                role="user",
-                content=req.message
-            ),
-            AIChatHistory(
-                user_id=user_id,
-                role="assistant",
-                content=answer
-            )
-        ])
-
-        db.commit()
+        if user_id is not None:
+            db.add_all([
+                AIChatHistory(
+                    user_id=user_id,
+                    role="user",
+                    content=req.message
+                ),
+                AIChatHistory(
+                    user_id=user_id,
+                    role="assistant",
+                    content=answer
+                )
+            ])
+            db.commit()
 
         # 👉 return clean
         return {
