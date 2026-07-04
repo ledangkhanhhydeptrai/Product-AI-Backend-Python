@@ -39,6 +39,8 @@ async def custom_swagger():
         openapi_url=app.openapi_url,
         title="Product AI"
     )
+
+
 @app.on_event("startup")
 def startup():
     with engine.connect() as conn:
@@ -46,6 +48,7 @@ def startup():
         conn.commit()
 
     Base.metadata.create_all(bind=engine)
+
 
 app.add_exception_handler(
     HTTPException,
