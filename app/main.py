@@ -69,7 +69,7 @@ app.include_router(payment_router)
 app.include_router(review_router)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://product-ai-front-end.vercel.app/api"],
+    allow_origins=["http://localhost:3000", "https://product-ai-front-end.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
