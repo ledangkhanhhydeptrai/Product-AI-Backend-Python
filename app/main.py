@@ -60,17 +60,9 @@ app.include_router(payment_router)
 app.include_router(review_router)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "https://product-ai-front-end.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 Base.metadata.create_all(bind=engine)
-
-if __name__ == '__main__':
-    uvicorn.run(
-        "app.main:app",
-        host="localhost",
-        port=8080,
-        reload=True
-    )
