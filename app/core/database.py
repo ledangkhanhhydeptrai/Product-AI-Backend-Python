@@ -21,5 +21,8 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine
 )
-
+print("Current working directory:", os.getcwd())
+print("Database file:", __file__)
+print(".env exists in cwd:", os.path.exists(".env"))
+print("DATABASE_URL:", os.getenv("DATABASE_URL"))
 Base = declarative_base()
