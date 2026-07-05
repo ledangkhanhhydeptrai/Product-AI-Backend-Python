@@ -8,3 +8,4 @@ from app.models.order_item import OrderItem
 from app.models.review import Review
 from app.models.ai_chat_histories import AIChatHistory
 from app.models.product_embedding import ProductEmbedding
+from app.models.payment import Payment
