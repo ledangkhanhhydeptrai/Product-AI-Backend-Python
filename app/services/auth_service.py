@@ -48,7 +48,7 @@ class AuthService:
             key="access_token",
             value=token,
             httponly=True,
-            secure=False,
+            secure=True,
             samesite="lax",
             path="/"
         )
