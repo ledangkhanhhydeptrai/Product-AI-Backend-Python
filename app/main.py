@@ -20,6 +20,7 @@ from app.exception.GlobalExceptionHandler import (
 )
 
 from app.core.database import Base, engine
+from app.core.seed_db import seed_users
 
 app = FastAPI(
     title="Product AI API",
@@ -49,6 +50,7 @@ def startup():
 
     Base.metadata.create_all(bind=engine)
 
+    seed_users()
 
 app.add_exception_handler(
     HTTPException,
