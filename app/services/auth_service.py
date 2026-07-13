@@ -49,7 +49,7 @@ class AuthService:
             value=token,
             httponly=True,
             secure=True,
-            samesite="lax",
+            samesite="none",
             path="/"
         )
         return ApiResponse(
