@@ -20,10 +20,10 @@ def get_current_user(
         credentials: HTTPAuthorizationCredentials | None = Depends(security)
 ):
     token = None
-
+    cookies_token = request.cookies.get("access_token")
     # 1. ưu tiên cookie
-    if request.cookies.get("access_token"):
-        token = request.cookies.get("access_token")
+    if cookies_token:
+        token = cookies_token
 
     # 2. fallback header
     elif credentials:
