@@ -48,7 +48,7 @@ class AuthService:
             key="access_token",
             value=token,
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="none",
             path="/"
         )
@@ -56,6 +56,7 @@ class AuthService:
             status=200,
             message="User login successfully",
             data={
+                "accessToken": token,
                 "user": {
                     "id": str(user.id),
                     "role": user.role,
